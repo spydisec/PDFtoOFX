@@ -1,0 +1,56 @@
+# Docker Compose configuration for local development and testing
+# 
+# Usage:
+#   docker-compose up        - Start the service
+#   docker-compose up -d     - Start in detached mode
+#   docker-compose down      - Stop and remove containers
+#   docker-compose logs -f   - Follow logs
+
+version: '3.8'
+
+services:
+  anzplus-ofx-converter:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: spydisec/anzplus-ofx-converter:latest
+    container_name: anzplus-ofx-converter
+    
+    # Port mapping
+    ports:
+      - "8000:8000"
+    
+    # Environment variables
+    environment:
+      - ENVIRONMENT=development
+      - PORT=8000
+      - HOST=0.0.0.0
+      - WORKERS=2
+      - LOG_LEVEL=info
+      - RELOAD=false
+    
+    # Volume mounts for development (optional - uncomment for live code updates)
+    # volumes:
+    #   - ../app:/app/app:ro
+    #   - ../run_web.py:/app/run_web.py:ro
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Resource limits (optional)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M

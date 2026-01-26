@@ -1,0 +1,86 @@
+# Docker ignore file - exclude unnecessary files from Docker build context
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.dist-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+.hypothesis/
+
+# Development dependencies
+requirements-dev.txt
+
+# Documentation
+*.md
+!README.md
+ARCHITECTURE.md
+INSTALLATION.md
+dockerhowto.md
+LICENSE
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+*.crt
+
+# Docker files (avoid recursion)
+docker/
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# CI/CD
+.github/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+tmp/
+temp/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Project-specific
+pyproject.toml

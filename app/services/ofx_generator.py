@@ -100,14 +100,19 @@ class OFXGenerator:
             # Convert date to datetime (midnight)
             dt = datetime.combine(txn.date, datetime.min.time()).replace(tzinfo=UTC)
             
+            # OFX spec limits: NAME max 32 chars, MEMO max 255 chars
+            memo_text = txn.memo or txn.description or ""
+            if len(memo_text) > 255:
+                memo_text = memo_text[:252] + "..."  # Truncate with ellipsis
+            
             stmttrn = STMTTRN(
                 trntype=txn.transaction_type.value,
                 dtposted=dt,
                 dtuser=dt,  # Same as dtposted for simplicity
                 trnamt=ofx_amount,
                 fitid=txn.fitid,
-                name=txn.name or txn.description[:32],
-                memo=txn.memo or txn.description
+                name=txn.name or txn.description[:32] if txn.description else "",
+                memo=memo_text
             )
             stmttrns.append(stmttrn)
         

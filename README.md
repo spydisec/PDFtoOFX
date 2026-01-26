@@ -5,6 +5,7 @@ Convert ANZ Plus bank statement PDFs to OFX format for seamless import into Actu
 [![Tests](https://img.shields.io/badge/tests-6%2F6%20passing-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
+[![Docker](https://img.shields.io/badge/docker-multi--arch-blue)](https://hub.docker.com/r/spydisec/anzplus-ofx-converter)
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
 
 ## ✨ Features
@@ -19,7 +20,78 @@ Convert ANZ Plus bank statement PDFs to OFX format for seamless import into Actu
 
 ## 🚀 Quick Start
 
-### Installation
+### 🐳 Option 1: Docker (Recommended)
+
+**Official multi-architecture image** - automatically built and published via GitHub Actions:
+
+```bash
+# Pull and run from Docker Hub (no installation required!)
+docker pull spydisec/anzplus-ofx-converter:latest
+docker run -d -p 8000:8000 spydisec/anzplus-ofx-converter:latest
+
+# Open your browser to http://localhost:8000
+```
+
+**Why Docker?**
+- ✅ No Python installation required
+- ✅ Works on Windows, Mac, Linux
+- ✅ Multi-architecture support (amd64, arm64/Apple Silicon)
+- ✅ Production-ready configuration
+- ✅ Automatic health checks
+- ✅ Simple version pinning
+
+**Version Pinning (Production):**
+```bash
+# Pin to specific version (recommended for stability)
+docker run -d -p 8000:8000 spydisec/anzplus-ofx-converter:1.0.0
+
+# Or always use latest
+docker run -d -p 8000:8000 spydisec/anzplus-ofx-converter:latest
+```
+
+**Custom Configuration:**
+```bash
+docker run -d -p 8000:8000 \
+  -e WORKERS=8 \
+  -e LOG_LEVEL=debug \
+  -e ENVIRONMENT=production \
+  spydisec/anzplus-ofx-converter:latest
+```
+
+**Docker Compose:**
+```yaml
+version: '3.8'
+services:
+  anzplus-ofx-converter:
+    image: spydisec/anzplus-ofx-converter:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - WORKERS=4
+      - LOG_LEVEL=info
+    restart: unless-stopped
+```
+
+**Build Locally (Optional):**
+
+Most users should use the official image. For development:
+
+```powershell
+# Windows
+.\docker\build-local.ps1
+
+# Linux/Mac
+docker build -f docker/Dockerfile -t anzplus-ofx:local .
+```
+
+**📚 Full Docker documentation: [docker/README.md](docker/README.md)**
+
+### 🐍 Option 2: Python Installation
+
+For local development or customization:
+
+#### Installation
 
 ```bash
 # Clone the repository
@@ -36,9 +108,11 @@ source .venv/bin/activate  # On Linux/Mac
 pip install -r requirements.txt
 ```
 
-**📚 For detailed installation instructions including Linux self-hosting, systemd service setup, Docker deployment, and Nginx configuration, see [INSTALLATION.md](INSTALLATION.md)**
+**📚 For detailed installation instructions including Linux self-hosting, systemd service setup, and Nginx configuration, see [INSTALLATION.md](INSTALLATION.md)**
 
-### Option 1: Web Interface (Recommended)
+#### Web Interface
+
+#### Web Interface
 
 Launch the elegant web app with drag-and-drop file upload:
 
@@ -56,7 +130,7 @@ Then open **http://localhost:8000** in your browser.
 - 🔒 Secure (files processed in memory, auto-deleted after download)
 - 📱 Fully mobile responsive
 
-### Option 2: Command Line
+#### Command Line Interface
 
 ```bash
 python convert_pdf.py input.pdf output.ofx
@@ -296,21 +370,50 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed technical documentation.
 
 ## 🚀 Deployment Options
 
+### 🐳 Docker (Recommended for Production)
+
+**Pull from Docker Hub:**
+```bash
+docker pull spydisec/anzplus-ofx-converter:latest
+docker run -d -p 8000:8000 --restart unless-stopped spydisec/anzplus-ofx-converter:latest
+```
+
+**Using Docker Compose:**
+```yaml
+version: '3.8'
+services:
+  anzplus-ofx:
+    image: spydisec/anzplus-ofx-converter:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - WORKERS=4
+      - LOG_LEVEL=info
+    restart: unless-stopped
+```
+
+**Multi-Architecture Support:**
+- Automatically pulls correct image for your platform
+- Supports: linux/amd64 (Intel/AMD), linux/arm64 (Apple Silicon, ARM)
+
+**📚 Complete Docker guide:** [docker/README.md](docker/README.md)
+
 ### Local Development
 ```bash
 python run_web.py
 ```
 
-### Docker (Recommended for Production)
-```bash
-docker build -t anz-ofx-converter .
-docker run -p 8000:8000 anz-ofx-converter
-```
-
 ### Cloud Platforms
+
+**Container-based (Docker):**
 - **Render.com:** Free tier available, auto-deploy from GitHub
-- **Railway.app:** $5/month, easy deployment
-- **Fly.io:** Pay-as-you-go, global edge deployment
+- **Railway.app:** $5/month, easy Docker deployment
+- **Fly.io:** Pay-as-you-go, multi-region, global edge
+- **AWS ECS/Fargate:** Enterprise-grade container orchestration
+- **Google Cloud Run:** Serverless containers, auto-scaling
+
+**Traditional hosting:**
+- Self-hosted VPS with systemd service (see [INSTALLATION.md](INSTALLATION.md))
 
 ## 🐛 Troubleshooting
 

@@ -49,7 +49,8 @@ class AnzPlusParser:
     # Account info patterns
     BSB_PATTERN = r'Branch Number \(BSB\)\s+Account Number\s+Balance as at.*?\n(\d+)\s+\$'
     ACCOUNT_PATTERN = r'Branch Number \(BSB\)\s+Account Number'
-    BALANCE_PATTERN = r'Balance as at (\d+) ([A-Za-z]+) (\d{4})\s*\n\d+\s+\$?([\d,]+\.\d{2})'
+    # Updated pattern to handle balance on next line
+    BALANCE_PATTERN = r'Balance as at (\d+) ([A-Za-z]+) (\d{4})\s*\n[\d\s]+\$?([\d,]+\.\d{2})'
     
     # Transaction line pattern
     # Format: "23 Jan ROUND UP TO 014111-169318495 #550672 $0.44 $232.16"
@@ -87,8 +88,16 @@ class AnzPlusParser:
         else:
             closing_balance = None
         
-        # Extract account number (simplified - ANZ Plus doesn't show full account in sample)
-        account_number = "ANZPLUS"  # Placeholder
+        # Extract BSB and account number
+        # Pattern: "014111 169 318 495 $86.56" after "Balance as at"
+        bsb_account_pattern = r'Balance as at.*?\n(\d{6})\s+([\d\s]+)\s+\$'
+        bsb_account_match = re.search(bsb_account_pattern, text)
+        if bsb_account_match:
+            bsb = bsb_account_match.group(1)
+            account_number = bsb_account_match.group(2).replace(' ', '')  # Remove spaces
+        else:
+            bsb = None
+            account_number = "ANZPLUS"  # Placeholder
         
         # Parse transactions
         transactions = self._parse_transactions(text)
@@ -119,7 +128,7 @@ class AnzPlusParser:
         return Statement(
             account_name="ANZ Plus",
             account_number=account_number,
-            bsb=None,  # Will extract from PDF if available
+            bsb=bsb,
             account_type=AccountType.CHECKING,
             opening_balance=opening_balance,
             closing_balance=closing_balance,

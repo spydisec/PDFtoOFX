@@ -3,7 +3,7 @@ import tempfile
 import time
 from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from starlette.background import BackgroundTask
 
 from app.services.pdf_extractor import extract_text_from_pdf
@@ -15,6 +15,24 @@ router = APIRouter()
 
 # File upload constraints
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+
+@router.get("/health")
+async def health_check():
+    """
+    Health check endpoint for Docker and orchestration tools
+    
+    Returns:
+        JSON response with service status
+    """
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "healthy",
+            "service": "anzplus-ofx-converter",
+            "version": "1.0.0"
+        }
+    )
 
 
 @router.post("/convert", response_class=HTMLResponse)
@@ -79,14 +97,18 @@ async def convert_pdf(file: UploadFile = File(...)):
         date_start = statement.date_start.strftime('%d %b %Y') if statement.date_start else 'N/A'
         date_end = statement.date_end.strftime('%d %b %Y') if statement.date_end else 'N/A'
         
+        # Format balances with None handling
+        opening_balance = f"{statement.opening_balance:.2f}" if statement.opening_balance is not None else "N/A"
+        closing_balance = f"{statement.closing_balance:.2f}" if statement.closing_balance is not None else "N/A"
+        
         # Return success HTML
         return success_response(
             filename=ofx_path.name,
             transaction_count=len(statement.transactions),
             date_start=date_start,
             date_end=date_end,
-            opening_balance=f"{statement.opening_balance:.2f}",
-            closing_balance=f"{statement.closing_balance:.2f}"
+            opening_balance=opening_balance,
+            closing_balance=closing_balance
         )
     
     except Exception as e:

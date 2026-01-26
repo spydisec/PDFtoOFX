@@ -14,6 +14,9 @@ uploads/
 temp/
 *.tmp
 
+# Docker maintainer directory (private scripts and configs)
+.docker-maintainer/
+
 # Distribution / packaging
 .Python
 build/
