@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.1] - 2025-01-XX
+### Added
+- Automated release workflow via GitHub Actions
+- Conventional Commits enforcement for better changelog generation
+- Alpine-native dependency compilation scripts (`compile-requirements.ps1` and `.sh`)
+
+### Changed
+- Version bumping now automated via `workflow_dispatch` trigger
+- **BREAKING:** `requirements.txt` must now be generated inside Alpine Docker container
+- Dependency workflow updated to use Docker-based pip-compile for Alpine compatibility
+
+### Documentation
+- Added comprehensive release process guide (.github/RELEASE_PROCESS.md)
+- Documented "Golden Rule" for Alpine dependency generation
+
+## [1.0.1] - 2025-01-26
 
 ### Security
 - Improved OFX filename generation with cryptographically secure random suffix using `secrets.token_hex(6)`
