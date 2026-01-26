@@ -76,15 +76,17 @@ PAYMENTS MELBOURNE"""
         assert "MYKI" in txn.description
         assert txn.balance == Decimal("233.45")
     
-    def test_skip_round_up_transactions(self):
-        """Test that ROUND UP transactions are skipped"""
+    def test_all_transactions_preserved(self):
+        """Test that all transactions including ROUND UP are preserved for accurate balances"""
         parser = AnzPlusParser(year=2026)
         text = """23 Jan ROUND UP TO 014111-169318495 #550672 $0.44 $232.16
 23 Jan VISA DEBIT PURCHASE CARD 1633 MYKI $25.00 $233.45"""
         
         statement = parser.parse(text)
-        assert len(statement.transactions) == 1
-        assert "MYKI" in statement.transactions[0].description
+        # Should include BOTH transactions (no filtering)
+        assert len(statement.transactions) == 2
+        assert any("ROUND UP" in txn.description for txn in statement.transactions)
+        assert any("MYKI" in txn.description for txn in statement.transactions)
 
 
 class TestEndToEnd:

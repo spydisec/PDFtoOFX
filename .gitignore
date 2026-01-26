@@ -11,6 +11,11 @@ test_output*.ofx
 *.ofx
 !examples/outputs/*.ofx
 
+# Web app uploads and temp files
+uploads/
+temp/
+*.tmp
+
 # Distribution / packaging
 .Python
 build/

@@ -153,11 +153,6 @@ class AnzPlusParser:
                 # Clean up description
                 description = description.strip()
                 
-                # Skip "ROUND UP" transactions (micro-savings, not real spending)
-                if description.startswith("ROUND UP TO"):
-                    i += 1
-                    continue
-                
                 # Capture multi-line descriptions
                 # Look ahead for continuation lines (merchant details, location, reference)
                 j = i + 1

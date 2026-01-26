@@ -14,7 +14,7 @@ Convert ANZ Plus bank statement PDFs to OFX format for import into Actual Budget
 ✅ **Accurate Credit/Debit Detection** - Uses balance change analysis for reliable transaction type identification  
 ✅ **Collision-free FITIDs** - Sequential counter strategy ensures unique transaction IDs for duplicate detection  
 ✅ **OFX v2.20 XML Format** - Compatible with Actual Budget and other modern finance applications  
-✅ **ROUND UP Filtering** - Automatically skips micro-savings transactions
+✅ **Complete Transaction History** - Converts all transactions without filtering to maintain accurate balances
 
 ## Quick Start
 
@@ -32,7 +32,25 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### Usage
+### Web Interface (Recommended)
+
+Run the elegant web interface with drag-and-drop file upload:
+
+```bash
+python run_web.py
+```
+
+Then open your browser to **http://localhost:8000**
+
+**Features:**
+- 🎨 Minimalistic, elegant design with Tailwind CSS
+- 📤 Drag-and-drop PDF upload
+- ⚡ Instant conversion with progress indicators
+- 📥 One-click OFX download
+- 🔒 Secure (files processed in memory, auto-deleted)
+- 📱 Mobile responsive
+
+### Command Line Interface
 
 ```bash
 python convert_pdf.py input.pdf output.ofx
@@ -119,9 +137,14 @@ This converter is **specifically designed for ANZ Plus** bank statement PDFs. It
 
 ```
 PDFtoOFX/
+├── run_web.py               # Web app launcher
 ├── convert_pdf.py           # CLI tool
 ├── app/
 │   ├── models.py            # Pydantic data models
+│   ├── web/                 # Web application
+│   │   ├── main.py          # FastAPI app
+│   │   ├── routes.py        # API endpoints
+│   │   └── templates/       # HTML templates (Tailwind + HTMX)
 │   └── services/
 │       ├── anz_plus_parser.py   # ANZ Plus PDF parser
 │       ├── fitid_generator.py   # Unique ID generation
@@ -132,6 +155,7 @@ PDFtoOFX/
 ├── docs/
 │   ├── QUICKSTART.md        # Detailed usage guide
 │   ├── IMPLEMENTATION_GUIDE.md  # Technical implementation
+│   ├── WEB_APP_PLAN.md      # Web app architecture
 │   └── DEVELOPMENT.md       # Contributing guide
 └── examples/
     ├── pdfs/                # Sample ANZ Plus PDFs
@@ -146,6 +170,33 @@ PDFtoOFX/
   - `pdfplumber>=0.11.0` - PDF text extraction
   - `pydantic>=2.5.3` - Data validation
   - `python-dateutil>=2.9.0` - Date parsing
+  - `fastapi>=0.109.0` - Web framework
+  - `uvicorn>=0.27.0` - ASGI server
+  - `jinja2>=3.1.3` - Template rendering
+
+## Development
+
+### Run Tests
+
+```bash
+pytest tests/ -v
+```
+
+### Run with Code Coverage
+
+```bash
+pytest tests/ --cov=app --cov-report=html
+```
+
+### Web App Development
+
+```bash
+# Run with auto-reload on code changes
+python run_web.py
+
+# Or use uvicorn directly
+uvicorn app.web.main:app --reload --port 8000
+```
 
 ## Documentation
 
