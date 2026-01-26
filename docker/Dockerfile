@@ -1,10 +1,11 @@
 # Multi-stage Dockerfile for ANZ Plus to OFX Converter
 # Uses Python 3.14 Alpine for minimal image size and security
+# Security: Pinned to specific Alpine version for reproducibility and security updates
 
 # ===========================
 # Stage 1: Builder
 # ===========================
-FROM python:3.14-alpine AS builder
+FROM python:3.14-alpine3.21 AS builder
 
 # Security: Upgrade all packages to latest versions
 RUN apk upgrade --no-cache
@@ -13,7 +14,10 @@ RUN apk upgrade --no-cache
 RUN apk add --no-cache \
     gcc \
     musl-dev \
-    linux-headers
+    linux-headers \
+    g++ \
+    make \
+    libffi-dev
 
 # Set working directory
 WORKDIR /build
@@ -29,15 +33,18 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # ===========================
 # Stage 2: Runtime
 # ===========================
-FROM python:3.14-alpine
+FROM python:3.14-alpine3.21
 
 # Security: Upgrade all packages to latest versions
 RUN apk upgrade --no-cache
 
-# Add labels for metadata
+# Add labels for metadata and security
 LABEL maintainer="spydisec" \
       description="ANZ Plus to OFX Converter - Convert ANZ Plus bank statements to OFX format" \
-      version="1.0.0"
+      version="1.0.1" \
+      org.opencontainers.image.source="https://github.com/spydisec/PDFtoOFX" \
+      org.opencontainers.image.documentation="https://github.com/spydisec/PDFtoOFX/blob/main/README.md" \
+      org.opencontainers.image.licenses="MIT"
 
 # Create non-root user for security
 RUN adduser -D -h /app -s /bin/sh appuser
@@ -58,12 +65,16 @@ COPY --chown=appuser:appuser requirements.txt .
 USER appuser
 
 # Environment variables with defaults
+# Security: PYTHONDONTWRITEBYTECODE prevents .pyc file creation
+# Security: PYTHONUNBUFFERED ensures logs are flushed immediately
 ENV ENVIRONMENT=production \
     PORT=8000 \
     HOST=0.0.0.0 \
     WORKERS=4 \
     LOG_LEVEL=info \
-    RELOAD=false
+    RELOAD=false \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 # Expose port
 EXPOSE 8000

@@ -1,6 +1,9 @@
 """API routes for PDF to OFX conversion"""
+import re
 import tempfile
 import time
+import secrets
+from datetime import datetime
 from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
@@ -88,10 +91,15 @@ async def convert_pdf(file: UploadFile = File(...)):
         generator = OFXGenerator(bank_config)
         ofx_content = generator.generate(statement)
         
+        # Generate secure filename: ofx_YYYYMMDD_HHMMSS_<random>.ofx
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        random_suffix = secrets.token_hex(6)  # 12 hex characters
+        filename = f"ofx_{timestamp}_{random_suffix}.ofx"
+        
         # Save OFX to temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.ofx', mode='wb') as tmp_ofx:
-            tmp_ofx.write(ofx_content)
-            ofx_path = Path(tmp_ofx.name)
+        temp_dir = Path(tempfile.gettempdir())
+        ofx_path = temp_dir / filename
+        ofx_path.write_bytes(ofx_content)
         
         # Format date range
         date_start = statement.date_start.strftime('%d %b %Y') if statement.date_start else 'N/A'
@@ -103,7 +111,7 @@ async def convert_pdf(file: UploadFile = File(...)):
         
         # Return success HTML
         return success_response(
-            filename=ofx_path.name,
+            filename=filename,
             transaction_count=len(statement.transactions),
             date_start=date_start,
             date_end=date_end,
@@ -123,17 +131,88 @@ async def convert_pdf(file: UploadFile = File(...)):
                 pass
 
 
+def validate_safe_filename(filename: str) -> str:
+    """
+    Validate and sanitize filename to prevent path traversal attacks (CWE-22)
+    
+    Args:
+        filename: User-provided filename
+        
+    Returns:
+        Validated filename
+        
+    Raises:
+        HTTPException: If filename is invalid or potentially malicious
+    """
+    # Rule 1: Must not be empty
+    if not filename or not filename.strip():
+        raise HTTPException(status_code=400, detail="Filename cannot be empty")
+    
+    # Rule 2: Must match expected pattern exactly
+    # Expected format: ofx_YYYYMMDD_HHMMSS_<random>.ofx
+    pattern = r'^ofx_\d{8}_\d{6}_[a-f0-9]{6,12}\.ofx$'
+    if not re.match(pattern, filename):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid filename format. Expected format: ofx_YYYYMMDD_HHMMSS_random.ofx"
+        )
+    
+    # Rule 3: No path separators (belt and suspenders)
+    if '/' in filename or '\\' in filename:
+        raise HTTPException(status_code=400, detail="Filename cannot contain path separators")
+    
+    # Rule 4: No multiple dots or parent directory references
+    if '..' in filename or filename.count('.') > 1:
+        raise HTTPException(status_code=400, detail="Invalid filename pattern")
+    
+    # Rule 5: Must be within reasonable length
+    if len(filename) > 100:
+        raise HTTPException(status_code=400, detail="Filename too long")
+    
+    # Rule 6: Only allow ASCII alphanumeric, underscore, hyphen, and single dot
+    allowed_chars = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.')
+    if not all(c in allowed_chars for c in filename):
+        raise HTTPException(status_code=400, detail="Filename contains invalid characters")
+    
+    return filename
+
+
 @router.get("/download/{filename}")
 async def download_ofx(filename: str):
-    """Download the generated OFX file"""
-    # Security: only allow filenames without path separators
-    if '/' in filename or '\\' in filename or '..' in filename:
-        raise HTTPException(status_code=400, detail="Invalid filename")
+    """
+    Download the generated OFX file
     
-    ofx_path = Path(tempfile.gettempdir()) / filename
+    Security: Validates filename to prevent path traversal attacks (CWE-22)
+    Uses strict allowlist validation and path resolution to ensure file access is safe
+    """
+    # Security: Validate filename with strict allowlist approach
+    safe_filename = validate_safe_filename(filename)
+    
+    # Construct path safely
+    temp_dir = Path(tempfile.gettempdir())
+    ofx_path = temp_dir / safe_filename
+    
+    # Security: Ensure resolved path is still within temp directory
+    # This prevents symlink attacks and path traversal
+    try:
+        ofx_path_resolved = ofx_path.resolve()
+        temp_dir_resolved = temp_dir.resolve()
+        
+        # Ensure the file is actually in the temp directory
+        if not str(ofx_path_resolved).startswith(str(temp_dir_resolved)):
+            raise HTTPException(status_code=403, detail="Access denied")
+    except (ValueError, OSError, RuntimeError):
+        raise HTTPException(status_code=400, detail="Invalid file path")
+    
+    # Use the resolved path for further operations
+    ofx_path = ofx_path_resolved
     
     if not ofx_path.exists():
         raise HTTPException(status_code=404, detail="File not found or expired. Please convert your PDF again.")
+    
+    # Security: Verify it's actually a file, not a directory
+    if not ofx_path.is_file():
+        raise HTTPException(status_code=400, detail="Invalid file type")
     
     # Check if file is too old (1 hour)
     if time.time() - ofx_path.stat().st_mtime > 3600:
