@@ -22,11 +22,17 @@ RUN apk add --no-cache \
 # Set working directory
 WORKDIR /build
 
-# Copy requirements file
-COPY requirements.txt .
+# Install pip-tools for compiling requirements
+RUN pip install --no-cache-dir pip-tools
 
-# Install Python dependencies
-# Use --no-cache-dir to reduce image size
+# Copy requirements.in (source file)
+COPY requirements.in .
+
+# Generate requirements.txt with hashes inside Alpine (ensures Alpine compatibility)
+# This is the "Golden Rule" - always compile requirements inside Alpine!
+RUN pip-compile --generate-hashes --resolver=backtracking requirements.in
+
+# Install Python dependencies from freshly compiled requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
