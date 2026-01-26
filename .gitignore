@@ -9,8 +9,6 @@ __pycache__/
 # Test outputs and temporary OFX files
 test_output*.ofx
 *.ofx
-!examples/outputs/*.ofx
-
 # Web app uploads and temp files
 uploads/
 temp/

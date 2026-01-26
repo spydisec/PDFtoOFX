@@ -101,7 +101,7 @@ python convert_pdf.py path/to/statement.pdf output.ofx
 
 **Example:**
 ```bash
-python convert_pdf.py examples/sample_statement.pdf my_transactions.ofx
+python convert_pdf.py statement.pdf my_transactions.ofx
 ```
 
 ## Production Deployment (Linux)

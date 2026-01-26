@@ -64,12 +64,12 @@ python convert_pdf.py input.pdf output.ofx
 
 **Example:**
 ```bash
-python convert_pdf.py examples/pdfs/sample_anz_plus.pdf statement.ofx
+python convert_pdf.py statement.pdf statement.ofx
 ```
 
 **Output:**
 ```
-Converting: examples/pdfs/sample_anz_plus.pdf
+Converting: statement.pdf
 Output to: statement.ofx
 
 Step 1: Extracting text from PDF...
@@ -164,12 +164,8 @@ PDFtoOFX/
 │       ├── routes.py           # API endpoints
 │       └── templates/          # HTML templates
 │
-├── tests/                      # Test suite
-│   └── test_converter.py       # Unit & integration tests
-│
-└── examples/                   # Sample files
-    ├── pdfs/                   # Sample ANZ Plus PDFs
-    └── outputs/                # Example OFX files
+└── tests/                      # Test suite
+    └── test_converter.py       # Unit & integration tests
 ```
 
 ## 🛠️ Requirements
@@ -278,7 +274,6 @@ Contributions are welcome! Here's how:
 - Maintain or improve code coverage (currently 91%)
 - Follow existing code style and patterns
 - Update documentation as needed
-- Add examples for new functionality
 
 ## 📋 How It Works
 
@@ -357,7 +352,6 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file
 - **Installation Guide:** [INSTALLATION.md](INSTALLATION.md) - Detailed setup for Linux, Docker, systemd, etc.
 - **Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md) - Technical documentation
 - **Repository:** [github.com/spydisec/PDFtoOFX](https://github.com/spydisec/PDFtoOFX)
-- **Examples:** Check the [examples/](examples/) directory
 
 ---
 
