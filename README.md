@@ -1,22 +1,23 @@
-# ANZ Plus PDF to OFX Converter
+# ANZ Plus to OFX Converter
 
-Convert ANZ Plus bank statement PDFs to OFX format for import into Actual Budget and other personal finance applications.
+Convert ANZ Plus bank statement PDFs to OFX format for seamless import into Actual Budget and other personal finance applications.
 
 [![Tests](https://img.shields.io/badge/tests-6%2F6%20passing-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
 
-## Features
+## ✨ Features
 
-✅ **Multi-line Description Capture** - Extracts complete transaction details including merchant, location, and reference numbers  
-✅ **Smart Truncation** - Preserves merchant names in 32-character NAME field by removing common prefixes  
-✅ **Accurate Credit/Debit Detection** - Uses balance change analysis for reliable transaction type identification  
-✅ **Collision-free FITIDs** - Sequential counter strategy ensures unique transaction IDs for duplicate detection  
-✅ **OFX v2.20 XML Format** - Compatible with Actual Budget and other modern finance applications  
-✅ **Complete Transaction History** - Converts all transactions without filtering to maintain accurate balances
+- **🎨 Modern Web Interface** - Drag-and-drop PDF upload with instant conversion
+- **📝 Multi-line Descriptions** - Captures complete transaction details including merchant, location, and reference numbers
+- **🎯 Smart Truncation** - Preserves merchant names in OFX NAME field by removing common prefixes
+- **💯 Accurate Detection** - Uses balance change analysis for reliable credit/debit identification
+- **🔐 Collision-free IDs** - Sequential FITID strategy ensures unique transaction IDs for duplicate prevention
+- **📊 Complete History** - Converts all transactions without filtering to maintain accurate balances
+- **⚡ OFX v2.20 XML** - Modern format compatible with Actual Budget and other finance apps
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Installation
 
@@ -27,30 +28,27 @@ cd PDFtoOFX
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Or install in development mode
-pip install -e .
 ```
 
-### Web Interface (Recommended)
+### Option 1: Web Interface (Recommended)
 
-Run the elegant web interface with drag-and-drop file upload:
+Launch the elegant web app with drag-and-drop file upload:
 
 ```bash
 python run_web.py
 ```
 
-Then open your browser to **http://localhost:8000**
+Then open **http://localhost:8000** in your browser.
 
-**Features:**
-- 🎨 Minimalistic, elegant design with Tailwind CSS
+**Web Interface Features:**
+- 🎨 Minimalistic design with Tailwind CSS
 - 📤 Drag-and-drop PDF upload
-- ⚡ Instant conversion with progress indicators
+- ⚡ Real-time conversion progress
 - 📥 One-click OFX download
-- 🔒 Secure (files processed in memory, auto-deleted)
-- 📱 Mobile responsive
+- 🔒 Secure (files processed in memory, auto-deleted after download)
+- 📱 Fully mobile responsive
 
-### Command Line Interface
+### Option 2: Command Line
 
 ```bash
 python convert_pdf.py input.pdf output.ofx
@@ -58,13 +56,13 @@ python convert_pdf.py input.pdf output.ofx
 
 **Example:**
 ```bash
-python convert_pdf.py examples/pdfs/sample_anz_plus.pdf my_statement.ofx
+python convert_pdf.py examples/pdfs/sample_anz_plus.pdf statement.ofx
 ```
 
 **Output:**
 ```
 Converting: examples/pdfs/sample_anz_plus.pdf
-Output to: my_statement.ofx
+Output to: statement.ofx
 
 Step 1: Extracting text from PDF...
   ✓ Extracted 5438 characters
@@ -76,12 +74,12 @@ Step 2: Parsing transactions...
 Step 3: Generating OFX file...
   ✓ Generated 8661 bytes of OFX data
 Step 4: Writing OFX file...
-  ✓ Saved to my_statement.ofx
+  ✓ Saved to statement.ofx
 
 ✅ Conversion complete!
 ```
 
-### Import into Actual Budget
+## 📥 Import to Actual Budget
 
 1. Open Actual Budget
 2. Navigate to your account
@@ -89,25 +87,24 @@ Step 4: Writing OFX file...
 4. Choose your `.ofx` file
 5. Review and approve transactions
 
-### Verify Duplicate Detection
+**Verify Duplicate Detection:**  
+Re-import the same OFX file to confirm all transactions are detected as duplicates, validating the FITID strategy.
 
-Re-import the same OFX file to confirm that all transactions are detected as duplicates. This validates that the FITID strategy is working correctly.
+## 🏦 Supported Bank
 
-## Supported Bank
+This converter is **specifically designed for ANZ Plus** digital PDF statements.
 
-This converter is **specifically designed for ANZ Plus** bank statement PDFs. It parses the unique transaction format used by ANZ Plus digital statements.
-
-**Supported Format:**
+**✅ Supported:**
 - ANZ Plus digital PDF statements
-- Transaction list format with Date, Description, Credit, Debit, Balance columns
+- Transaction format: Date, Description, Credit, Debit, Balance columns
 - Multi-line transaction details
 
-**Not Supported:**
-- Other ANZ products (ANZ Classic, ANZ Access, etc.) - different PDF formats
-- Scanned/image PDFs - requires OCR functionality
+**❌ Not Supported:**
+- Other ANZ products (ANZ Classic, ANZ Access, etc.) - different formats
+- Scanned/image PDFs - no OCR functionality
 - Other banks - requires bank-specific parsers
 
-## Example Transaction Output
+## 📝 Transaction Example
 
 **ANZ Plus PDF:**
 ```
@@ -128,91 +125,69 @@ This converter is **specifically designed for ANZ Plus** bank statement PDFs. It
 ```
 
 **Improvements:**
-- **NAME field:** `MYKI PAYMENTS MELBOURNE` (smart truncation - merchant visible)
-- **MEMO field:** Full description with location details
+- **NAME:** `MYKI PAYMENTS MELBOURNE` (merchant visible, smart truncation)
+- **MEMO:** Full description with all details
 - **Type:** Correctly identified as DEBIT using balance analysis
-- **FITID:** `ANZ_20260122_0001` (sequential counter, collision-free)
+- **FITID:** `ANZ_20260122_0001` (unique, collision-free)
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 PDFtoOFX/
-├── run_web.py               # Web app launcher
-├── convert_pdf.py           # CLI tool
-├── app/
-│   ├── models.py            # Pydantic data models
-│   ├── web/                 # Web application
-│   │   ├── main.py          # FastAPI app
-│   │   ├── routes.py        # API endpoints
-│   │   └── templates/       # HTML templates (Tailwind + HTMX)
-│   └── services/
-│       ├── anz_plus_parser.py   # ANZ Plus PDF parser
-│       ├── fitid_generator.py   # Unique ID generation
-│       ├── ofx_generator.py     # OFX XML builder
-│       └── pdf_extractor.py     # PDF text extraction
-├── tests/
-│   └── test_converter.py    # Test suite (91% coverage)
-├── docs/
-│   ├── QUICKSTART.md        # Detailed usage guide
-│   ├── IMPLEMENTATION_GUIDE.md  # Technical implementation
-│   ├── WEB_APP_PLAN.md      # Web app architecture
-│   └── DEVELOPMENT.md       # Contributing guide
-└── examples/
-    ├── pdfs/                # Sample ANZ Plus PDFs
-    └── outputs/             # Example OFX files
+├── README.md                    # This file
+├── ARCHITECTURE.md              # Technical documentation
+├── LICENSE                      # MIT license
+├── pyproject.toml              # Package configuration
+├── requirements.txt            # Dependencies
+├── requirements-dev.txt        # Development dependencies
+│
+├── run_web.py                  # Web app launcher
+├── convert_pdf.py              # CLI tool
+│
+├── app/                        # Application code
+│   ├── models.py               # Pydantic data models
+│   ├── services/               # Core business logic
+│   │   ├── anz_plus_parser.py  # ANZ Plus PDF parser
+│   │   ├── fitid_generator.py  # Unique ID generation
+│   │   ├── ofx_generator.py    # OFX XML generation
+│   │   └── pdf_extractor.py    # PDF text extraction
+│   └── web/                    # Web application
+│       ├── main.py             # FastAPI app
+│       ├── routes.py           # API endpoints
+│       └── templates/          # HTML templates
+│
+├── tests/                      # Test suite
+│   └── test_converter.py       # Unit & integration tests
+│
+└── examples/                   # Sample files
+    ├── pdfs/                   # Sample ANZ Plus PDFs
+    └── outputs/                # Example OFX files
 ```
 
-## Requirements
+## 🛠️ Requirements
 
-- Python 3.11 or higher
-- Dependencies (see [requirements.txt](requirements.txt)):
-  - `ofxtools>=0.9.6` - OFX file generation
-  - `pdfplumber>=0.11.0` - PDF text extraction
-  - `pydantic>=2.5.3` - Data validation
-  - `python-dateutil>=2.9.0` - Date parsing
+- **Python:** 3.11 or higher
+- **Dependencies:**
+  - `ofxtools>=0.9.6` - OFX v2.20 XML generation
+  - `pdfplumber>=0.11.9` - PDF text extraction
+  - `pydantic>=2.12.5` - Data validation
+  - `python-dateutil` - Date parsing
   - `fastapi>=0.109.0` - Web framework
-  - `uvicorn>=0.27.0` - ASGI server
+  - `uvicorn[standard]>=0.27.0` - ASGI server
   - `jinja2>=3.1.3` - Template rendering
+  - `python-multipart>=0.0.6` - File uploads
+  - `aiofiles>=23.2.1` - Async file operations
 
-## Development
+## 🧪 Testing
 
-### Run Tests
-
-```bash
-pytest tests/ -v
-```
-
-### Run with Code Coverage
+Run the test suite:
 
 ```bash
-pytest tests/ --cov=app --cov-report=html
-```
-
-### Web App Development
-
-```bash
-# Run with auto-reload on code changes
-python run_web.py
-
-# Or use uvicorn directly
-uvicorn app.web.main:app --reload --port 8000
-```
-
-## Documentation
-
-- **[Quick Start Guide](docs/QUICKSTART.md)** - Detailed installation and usage
-- **[Implementation Guide](docs/IMPLEMENTATION_GUIDE.md)** - Technical architecture
-- **[Development Guide](docs/DEVELOPMENT.md)** - Contributing to the project
-- **[Project Summary](docs/PROJECT_SUMMARY.md)** - Original project documentation
-
-## Testing
-
-```bash
-# Run tests
+# Run all tests
 python -m pytest tests/ -v
 
-# Run with coverage
-python -m pytest tests/ --cov=app --cov-report=term-missing
+# Run with coverage report
+python -m pytest tests/ --cov=app --cov-report=html
 ```
 
 **Test Results:**
@@ -222,82 +197,160 @@ python -m pytest tests/ --cov=app --cov-report=term-missing
 ✅ FITID collision detection verified
 ✅ Multi-line description capture validated
 ✅ Smart truncation tested
+✅ End-to-end conversion verified
 ```
 
-## How It Works
+## 🔧 Development
 
-### 1. PDF Text Extraction
-Uses `pdfplumber` to extract text from ANZ Plus PDF statements.
+### Setup Development Environment
 
-### 2. Transaction Parsing
-Custom regex patterns parse the ANZ Plus transaction format:
-- Date and month (e.g., "22 Jan")
-- Multi-line descriptions (merchant, location, reference)
-- Amounts and balances
-- Filters out ROUND UP micro-savings
+```bash
+# Create virtual environment
+python -m venv .venv
 
-### 3. Smart Truncation
-Strips common prefixes before 32-character truncation:
-- `VISA DEBIT PURCHASE CARD 1633` → merchant name
-- `EFTPOS` → merchant name
-- `PAYMENT TO` → payee name
+# Activate (Windows)
+.venv\Scripts\activate
 
-### 4. Credit/Debit Detection
-Priority-based detection:
-1. **Balance change analysis** (most reliable) - compares chronological balance changes
-2. **Keyword detection** - expanded lists for CREDIT and DEBIT transactions
-3. **Default to DEBIT** - conservative fallback
+# Activate (Linux/Mac)
+source .venv/bin/activate
 
-### 5. FITID Generation
-Sequential counter format: `ANZ_YYYYMMDD_NNNN`
-- Guarantees no collisions
-- Enables reliable duplicate detection
-- Works across multiple imports
+# Install development dependencies
+pip install -r requirements-dev.txt
+```
 
-### 6. OFX Generation
-Uses `ofxtools` library to generate valid OFX v2.20 XML format compatible with Actual Budget.
+### Code Style
 
-## Known Limitations
+- Follow **PEP 8** guidelines
+- Use **type hints** for all functions
+- Write **docstrings** for public APIs
+- Maximum line length: **100 characters**
 
-- **ANZ Plus Only** - Currently only supports ANZ Plus PDF format
-- **Digital PDFs** - Does not support scanned/image PDFs (OCR not implemented)
-- **Manual Year** - Parser uses current year (can be overridden if needed)
-- **Single Bank** - Multi-bank support requires bank-specific parsers
+### Running the Web App in Development
 
-## Future Enhancements
+```bash
+# Auto-reload on code changes
+python run_web.py
 
-- [ ] Support for other ANZ products
-- [ ] Support for other Australian banks (CommBank, Westpac, NAB, Up Bank)
-- [ ] OCR support for scanned PDFs
-- [ ] Web interface for easy uploads
-- [ ] Batch processing for multiple statements
-- [ ] Docker container for easy deployment
+# Or use uvicorn directly
+uvicorn app.web.main:app --reload --port 8000
+```
 
-## Contributing
+### Pre-commit Checks
 
-Contributions are welcome! Please see [DEVELOPMENT.md](docs/DEVELOPMENT.md) for:
-- Development setup
-- Code style guidelines
-- Testing requirements
-- Pull request process
+```bash
+# Format code
+black app/ tests/
 
-## License
+# Run linter
+flake8 app/ tests/
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+# Type checking
+mypy app/
 
-## Acknowledgments
+# Run tests
+pytest tests/ -v
+```
 
-- Built with [ofxtools](https://github.com/csingley/ofxtools) for OFX generation
-- PDF parsing powered by [pdfplumber](https://github.com/jsvine/pdfplumber)
-- Designed for [Actual Budget](https://actualbudget.com/) compatibility
+## 🤝 Contributing
 
-## Support
+Contributions are welcome! Here's how:
 
-For issues, questions, or feature requests:
-- Open an [issue](https://github.com/yourusername/PDFtoOFX/issues)
-- Check [existing documentation](docs/)
-- Review [example files](examples/)
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Make** your changes
+4. **Add** tests for new functionality
+5. **Ensure** all tests pass (`pytest tests/ -v`)
+6. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+7. **Push** to the branch (`git push origin feature/amazing-feature`)
+8. **Open** a Pull Request
+
+### Contribution Guidelines
+
+- Write tests for new features
+- Maintain or improve code coverage (currently 91%)
+- Follow existing code style and patterns
+- Update documentation as needed
+- Add examples for new functionality
+
+## 📋 How It Works
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed technical documentation.
+
+**High-level flow:**
+1. **Extract** text from PDF using pdfplumber
+2. **Parse** transactions with regex patterns (supports multi-line descriptions)
+3. **Truncate** smartly (remove common prefixes, preserve merchant names)
+4. **Detect** credit/debit using balance change analysis
+5. **Generate** unique FITIDs using sequential counter
+6. **Create** OFX v2.20 XML using ofxtools library
+
+## ⚠️ Known Limitations
+
+- **Single Bank:** Currently only supports ANZ Plus PDF format
+- **Digital Only:** Does not support scanned/image PDFs (no OCR)
+- **Date Handling:** Uses current year if not found in PDF
+- **Manual Categorization:** Transactions import uncategorized
+
+## 🚀 Deployment Options
+
+### Local Development
+```bash
+python run_web.py
+```
+
+### Docker (Recommended for Production)
+```bash
+docker build -t anz-ofx-converter .
+docker run -p 8000:8000 anz-ofx-converter
+```
+
+### Cloud Platforms
+- **Render.com:** Free tier available, auto-deploy from GitHub
+- **Railway.app:** $5/month, easy deployment
+- **Fly.io:** Pay-as-you-go, global edge deployment
+
+## 🐛 Troubleshooting
+
+### Web app won't start
+```bash
+# Check if port 8000 is in use
+netstat -ano | findstr :8000
+
+# Use different port
+uvicorn app.web.main:app --port 3000
+```
+
+### PDF conversion fails
+- Ensure PDF is from ANZ Plus (not ANZ Classic/Access)
+- Verify PDF is not scanned/image-based
+- Check PDF is not password-protected
+
+### Balance mismatch in Actual Budget
+- All transactions are now preserved (including ROUND UP)
+- Verify opening and closing balances match your PDF
+- Check for any filtered transactions
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [ofxtools](https://github.com/csingley/ofxtools) - OFX file generation
+- [pdfplumber](https://github.com/jsvine/pdfplumber) - PDF text extraction
+- [Actual Budget](https://actualbudget.com/) - Personal finance management
+- [FastAPI](https://fastapi.tiangolo.com/) - Modern web framework
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
+- [HTMX](https://htmx.org/) - Dynamic HTML interactions
+
+## 📞 Support
+
+- **Issues:** [GitHub Issues](https://github.com/yourusername/PDFtoOFX/issues)
+- **Documentation:** [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Examples:** Check the [examples/](examples/) directory
 
 ---
 
 **Note:** This project is not affiliated with ANZ Bank. It is an independent tool created for personal finance management.
+
+**Made with ❤️ for the Actual Budget community**

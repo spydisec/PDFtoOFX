@@ -2,7 +2,7 @@
 # ANZ Plus MVP - Minimal dependencies for core functionality
 
 # OFX Generation (CRITICAL - using ofxtools instead of manual SGML)
-ofxtools>=0.9.6
+ofxtools>=0.9.5
 
 # PDF Processing
 pdfplumber>=0.11.9
@@ -10,7 +10,7 @@ streamlit>=1.53.1
 
 # Data Models & Validation
 pydantic>=2.12.5
-pandas>=3.0.0
+pandas>=1.4.0,<3.0
 # Date Handling
 python-dateutil
 
