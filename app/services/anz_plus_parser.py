@@ -6,6 +6,9 @@ from typing import List, Optional
 from dateutil import parser as date_parser
 
 from app.models import Transaction, Statement, TransactionType, AccountType
+from app.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def smart_truncate(description: str, max_len: int = 32) -> str:
@@ -79,14 +82,19 @@ class AnzPlusParser:
         Returns:
             Statement object with transactions
         """
+        logger.info("Starting ANZ Plus PDF parsing")
+        logger.debug(f"Input text length: {len(text)} characters")
+        
         # Extract year from balance date if available
         balance_match = re.search(self.BALANCE_PATTERN, text)
         if balance_match:
             _, _, year_str, balance_str = balance_match.groups()
             self.year = int(year_str)
             closing_balance = Decimal(balance_str.replace(',', ''))
+            logger.info(f"Closing balance found: ${closing_balance} for year {self.year}")
         else:
             closing_balance = None
+            logger.warning("No closing balance found in PDF")
         
         # Extract BSB and account number
         # Pattern: "014111 169 318 495 $86.56" after "Balance as at"
@@ -95,20 +103,26 @@ class AnzPlusParser:
         if bsb_account_match:
             bsb = bsb_account_match.group(1)
             account_number = bsb_account_match.group(2).replace(' ', '')  # Remove spaces
+            logger.info(f"Account identified: BSB={bsb}, Account={account_number}")
         else:
             bsb = None
             account_number = "ANZPLUS"  # Placeholder
+            logger.warning("BSB and account number not found, using placeholder")
         
         # Parse transactions
+        logger.info("Parsing transactions...")
         transactions = self._parse_transactions(text)
+        logger.info(f"Found {len(transactions)} transactions")
         
         # Determine date range from transactions
         if transactions:
             dates = [t.date for t in transactions]
             date_start = min(dates)
             date_end = max(dates)
+            logger.info(f"Date range: {date_start} to {date_end}")
         else:
             date_start = date_end = date.today()
+            logger.warning("No transactions found, using current date")
         
         # Opening balance is the balance of the earliest transaction
         opening_balance = None
@@ -123,7 +137,10 @@ class AnzPlusParser:
                         opening_balance = txn.balance + txn.amount
                     else:
                         opening_balance = txn.balance - txn.amount
+                    logger.info(f"Opening balance calculated: ${opening_balance}")
                     break
+        
+        logger.info("ANZ Plus PDF parsing completed successfully")
         
         return Statement(
             account_name="ANZ Plus",

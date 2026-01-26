@@ -14,6 +14,9 @@ from ofxtools.utils import UTC
 
 from app.models import Statement, Transaction, TransactionType, BankConfig
 from app.services.fitid_generator import FitidGenerator
+from app.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class OFXGenerator:
@@ -39,6 +42,8 @@ class OFXGenerator:
         Returns:
             OFX file content as bytes
         """
+        logger.info(f"Starting OFX generation for {len(statement.transactions)} transactions")
+        
         # Generate FITIDs for all transactions
         self.fitid_generator.reset()
         transactions_with_fitid = []
@@ -53,8 +58,15 @@ class OFXGenerator:
                 )
             transactions_with_fitid.append(txn)
         
+        logger.debug("FITIDs generated for all transactions")
+        
         # Build OFX structure
-        ofx = self._build_ofx(statement, transactions_with_fitid)
+        try:
+            ofx = self._build_ofx(statement, transactions_with_fitid)
+            logger.debug("OFX structure built successfully")
+        except Exception as e:
+            logger.error(f"Failed to build OFX structure: {str(e)}", exc_info=True)
+            raise
         
         # Generate header
         header = make_header(
@@ -74,8 +86,11 @@ class OFXGenerator:
         # Combine header and body
         header_str = str(header)
         full_ofx = header_str + body
+        ofx_bytes = full_ofx.encode('utf-8')
         
-        return full_ofx.encode('utf-8')
+        logger.info(f"OFX generation completed: {len(ofx_bytes)} bytes")
+        
+        return ofx_bytes
     
     def _build_ofx(self, statement: Statement, transactions: List[Transaction]) -> OFX:
         """Build OFX object structure"""

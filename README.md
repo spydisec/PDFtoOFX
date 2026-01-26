@@ -17,6 +17,7 @@ Convert ANZ Plus bank statement PDFs to OFX format for seamless import into Actu
 - **🔐 Collision-free IDs** - Sequential FITID strategy ensures unique transaction IDs for duplicate prevention
 - **📊 Complete History** - Converts all transactions without filtering to maintain accurate balances
 - **⚡ OFX v2.20 XML** - Modern format compatible with Actual Budget and other finance apps
+- **📋 Comprehensive Logging** - Production-ready logging with file rotation, JSON formatting, and monitoring support
 
 ## 🚀 Quick Start
 
@@ -454,6 +455,7 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file
 - **Issues:** [GitHub Issues](https://github.com/spydisec/PDFtoOFX/issues)
 - **Installation Guide:** [INSTALLATION.md](INSTALLATION.md) - Detailed setup for Linux, Docker, systemd, etc.
 - **Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md) - Technical documentation
+- **Logging:** [LOGGING.md](LOGGING.md) - Comprehensive logging and monitoring guide
 - **Repository:** [github.com/spydisec/PDFtoOFX](https://github.com/spydisec/PDFtoOFX)
 
 ---

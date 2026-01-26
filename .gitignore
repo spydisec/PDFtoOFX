@@ -14,6 +14,10 @@ uploads/
 temp/
 *.tmp
 
+# Application logs
+logs/
+*.log
+
 # Docker maintainer directory (private scripts and configs)
 .docker-maintainer/
 

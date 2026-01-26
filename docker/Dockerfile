@@ -67,6 +67,9 @@ COPY --chown=appuser:appuser app/ ./app/
 COPY --chown=appuser:appuser run_web.py .
 COPY --chown=appuser:appuser requirements.txt .
 
+# Create logs directory with proper permissions
+RUN mkdir -p logs && chown appuser:appuser logs
+
 # Switch to non-root user
 USER appuser
 

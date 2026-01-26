@@ -13,7 +13,9 @@ from app.services.pdf_extractor import extract_text_from_pdf
 from app.services.anz_plus_parser import AnzPlusParser
 from app.services.ofx_generator import OFXGenerator
 from app.models import BankConfig
+from app.logging_config import get_logger
 
+logger = get_logger(__name__)
 router = APIRouter()
 
 # File upload constraints
@@ -45,18 +47,26 @@ async def convert_pdf(file: UploadFile = File(...)):
     
     Returns HTML response with download button (for HTMX swap)
     """
+    logger.info(f"Conversion request received: filename={file.filename}")
+    
     # Validate file type
     if not file.filename.lower().endswith('.pdf'):
+        logger.warning(f"Invalid file type uploaded: {file.filename}")
         return error_response("Only PDF files are supported. Please upload an ANZ Plus statement PDF.")
     
     # Read file content
     content = await file.read()
+    file_size = len(content)
+    
+    logger.debug(f"File read successfully: size={file_size} bytes")
     
     # Validate file size
-    if len(content) > MAX_FILE_SIZE:
+    if file_size > MAX_FILE_SIZE:
+        logger.warning(f"File too large: {file_size} bytes (max: {MAX_FILE_SIZE})")
         return error_response(f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB.")
     
-    if len(content) == 0:
+    if file_size == 0:
+        logger.warning(f"Empty file uploaded: {file.filename}")
         return error_response("File is empty. Please upload a valid ANZ Plus statement PDF.")
     
     pdf_path = None
@@ -68,20 +78,31 @@ async def convert_pdf(file: UploadFile = File(...)):
             tmp_pdf.write(content)
             pdf_path = Path(tmp_pdf.name)
         
+        logger.debug(f"PDF saved to temporary file: {pdf_path}")
+        
         # Extract text from PDF
+        logger.info("Extracting text from PDF...")
         text = extract_text_from_pdf(pdf_path)
         
         if not text or len(text.strip()) < 100:
+            logger.error(f"Failed to extract text from PDF: text_length={len(text) if text else 0}")
             return error_response("Could not extract text from PDF. Please ensure it's a valid ANZ Plus statement.")
         
+        logger.debug(f"Text extracted successfully: {len(text)} characters")
+        
         # Parse transactions
+        logger.info("Parsing transactions...")
         parser = AnzPlusParser()
         statement = parser.parse(text)
         
         if not statement.transactions:
+            logger.warning("No transactions found in PDF")
             return error_response("No transactions found in the PDF. Please check if this is a valid ANZ Plus statement.")
         
+        logger.info(f"Parsed {len(statement.transactions)} transactions")
+        
         # Generate OFX
+        logger.info("Generating OFX content...")
         bank_config = BankConfig(
             name="ANZ Plus",
             ofx_version=220,
@@ -101,6 +122,9 @@ async def convert_pdf(file: UploadFile = File(...)):
         ofx_path = temp_dir / filename
         ofx_path.write_bytes(ofx_content)
         
+        logger.info(f"OFX file created successfully: {filename}")
+        logger.debug(f"OFX file path: {ofx_path}")
+        
         # Format date range
         date_start = statement.date_start.strftime('%d %b %Y') if statement.date_start else 'N/A'
         date_end = statement.date_end.strftime('%d %b %Y') if statement.date_end else 'N/A'
@@ -108,6 +132,12 @@ async def convert_pdf(file: UploadFile = File(...)):
         # Format balances with None handling
         opening_balance = f"{statement.opening_balance:.2f}" if statement.opening_balance is not None else "N/A"
         closing_balance = f"{statement.closing_balance:.2f}" if statement.closing_balance is not None else "N/A"
+        
+        logger.info(
+            f"Conversion successful: transactions={len(statement.transactions)}, "
+            f"date_range={date_start} to {date_end}, "
+            f"opening_balance={opening_balance}, closing_balance={closing_balance}"
+        )
         
         # Return success HTML
         return success_response(
@@ -120,6 +150,15 @@ async def convert_pdf(file: UploadFile = File(...)):
         )
     
     except Exception as e:
+        logger.error(
+            f"Conversion failed: {str(e)}",
+            exc_info=True,
+            extra={
+                "filename": file.filename,
+                "file_size": len(content),
+                "exception_type": type(e).__name__
+            }
+        )
         return error_response(f"Conversion failed: {str(e)}")
     
     finally:
@@ -127,8 +166,9 @@ async def convert_pdf(file: UploadFile = File(...)):
         if pdf_path and pdf_path.exists():
             try:
                 pdf_path.unlink()
-            except:
-                pass
+                logger.debug(f"Temporary PDF file cleaned up: {pdf_path}")
+            except Exception as e:
+                logger.warning(f"Failed to clean up temporary PDF file: {e}")
 
 
 def validate_safe_filename(filename: str) -> str:
@@ -185,8 +225,14 @@ async def download_ofx(filename: str):
     Security: Validates filename to prevent path traversal attacks (CWE-22)
     Uses strict allowlist validation and path resolution to ensure file access is safe
     """
+    logger.info(f"Download request: filename={filename}")
+    
     # Security: Validate filename with strict allowlist approach
-    safe_filename = validate_safe_filename(filename)
+    try:
+        safe_filename = validate_safe_filename(filename)
+    except HTTPException as e:
+        logger.warning(f"Invalid filename validation failed: {filename}, error={e.detail}")
+        raise
     
     # Construct path safely
     temp_dir = Path(tempfile.gettempdir())
@@ -200,24 +246,32 @@ async def download_ofx(filename: str):
         
         # Ensure the file is actually in the temp directory
         if not str(ofx_path_resolved).startswith(str(temp_dir_resolved)):
+            logger.error(f"Path traversal attempt detected: {filename}")
             raise HTTPException(status_code=403, detail="Access denied")
-    except (ValueError, OSError, RuntimeError):
+    except (ValueError, OSError, RuntimeError) as e:
+        logger.error(f"Invalid file path: {filename}, error={str(e)}")
         raise HTTPException(status_code=400, detail="Invalid file path")
     
     # Use the resolved path for further operations
     ofx_path = ofx_path_resolved
     
     if not ofx_path.exists():
+        logger.warning(f"File not found: {filename}")
         raise HTTPException(status_code=404, detail="File not found or expired. Please convert your PDF again.")
     
     # Security: Verify it's actually a file, not a directory
     if not ofx_path.is_file():
+        logger.error(f"Invalid file type (not a file): {filename}")
         raise HTTPException(status_code=400, detail="Invalid file type")
     
     # Check if file is too old (1 hour)
-    if time.time() - ofx_path.stat().st_mtime > 3600:
+    file_age = time.time() - ofx_path.stat().st_mtime
+    if file_age > 3600:
+        logger.info(f"File expired (age: {file_age}s): {filename}")
         ofx_path.unlink()
         raise HTTPException(status_code=404, detail="File has expired. Please convert your PDF again.")
+    
+    logger.info(f"File download started: {filename}")
     
     return FileResponse(
         path=ofx_path,
@@ -237,8 +291,9 @@ def cleanup_file(file_path: Path):
         if file_path.exists():
             time.sleep(1)  # Give time for download to complete
             file_path.unlink()
-    except:
-        pass
+            logger.debug(f"File cleaned up after download: {file_path.name}")
+    except Exception as e:
+        logger.warning(f"Failed to clean up file {file_path.name}: {e}")
 
 
 def success_response(filename: str, transaction_count: int, date_start: str, 
