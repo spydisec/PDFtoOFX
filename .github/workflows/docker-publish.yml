@@ -14,6 +14,11 @@ on:
         required: true
         default: '1.0.0'
 
+# Required permissions for creating releases
+permissions:
+  contents: write
+  packages: write
+
 env:
   DOCKER_HUB_REPO: spydisec/anzplus-ofx-converter
   PYTHON_VERSION: '3.11'  # For running tests
@@ -109,6 +114,7 @@ jobs:
       
       - name: Update Docker Hub description
         uses: peter-evans/dockerhub-description@v4
+        continue-on-error: true
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -117,12 +123,12 @@ jobs:
           readme-filepath: ./README.md
       
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           generate_release_notes: true
           body: |
-            ## Docker Image
+            ## 🐳 Docker Image
             
             Multi-architecture Docker image available on Docker Hub:
             
@@ -132,8 +138,8 @@ jobs:
             ```
             
             **Supported platforms:**
-            - linux/amd64 (x86_64)
-            - linux/arm64 (Apple Silicon, ARM servers)
+            - `linux/amd64` (x86_64)
+            - `linux/arm64` (Apple Silicon, ARM servers)
             
             **Quick start:**
             ```bash
@@ -142,9 +148,9 @@ jobs:
             
             Then open http://localhost:8000
             
+            **Docker Hub:** https://hub.docker.com/r/${{ env.DOCKER_HUB_REPO }}
+            
             ---
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Summary
         run: |
