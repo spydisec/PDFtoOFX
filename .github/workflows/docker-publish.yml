@@ -113,7 +113,7 @@ jobs:
           cache-to: type=registry,ref=${{ env.DOCKER_HUB_REPO }}:buildcache,mode=max
       
       - name: Update Docker Hub description
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         continue-on-error: true
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
