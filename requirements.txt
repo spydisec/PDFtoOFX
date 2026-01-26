@@ -13,7 +13,7 @@ pydantic>=2.12.5
 pandas>=1.4.0,<3.0
 # Date Handling
 python-dateutil
-
+protobuf>=6.33.4
 # Development & Testing
 pytest>=9.0.2
 pytest-cov>=7.0.0
