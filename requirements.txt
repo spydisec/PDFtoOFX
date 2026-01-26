@@ -1,0 +1,28 @@
+# PDF to OFX Converter - Python Dependencies
+# ANZ Plus MVP - Minimal dependencies for core functionality
+
+# OFX Generation (CRITICAL - using ofxtools instead of manual SGML)
+ofxtools>=0.9.6
+
+# PDF Processing
+pdfplumber>=0.11.9
+
+# Data Models & Validation
+pydantic>=2.12.5
+
+# Date Handling
+python-dateutil
+
+# Development & Testing
+pytest>=9.0.2
+pytest-cov>=7.0.0
+
+# Optional: FastAPI (for future web interface)
+# fastapi>=0.109.0
+# uvicorn[standard]>=0.27.0
+# python-multipart>=0.0.6
+
+# Optional: OCR (for scanned PDFs - not needed for ANZ Plus digital PDFs)
+# pytesseract>=0.3.10
+# opencv-python>=4.9.0.80
+# Pillow>=10.2.0

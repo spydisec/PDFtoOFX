@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?OFX OFXHEADER="200" VERSION="220" SECURITY="NONE" OLDFILEUID="NONE" NEWFILEUID="NONE"?>
+<OFX>
+  <SIGNONMSGSRSV1>
+    <SONRS>
+      <STATUS>
+        <CODE>0</CODE>
+        <SEVERITY>INFO</SEVERITY>
+      </STATUS>
+      <DTSERVER>20260126131305[+11.00:AEDT]</DTSERVER>
+      <LANGUAGE>ENG</LANGUAGE>
+    </SONRS>
+  </SIGNONMSGSRSV1>
+  <BANKMSGSRSV1>
+    <STMTTRNRS>
+      <STATUS>
+        <CODE>0</CODE>
+        <SEVERITY>INFO</SEVERITY>
+      </STATUS>
+      <STMTRS>
+        <CURDEF>AUD</CURDEF>
+        <BANKACCTFROM>
+          <BANKID>633-123</BANKID>
+          <ACCTID>212986236</ACCTID>
+          <ACCTTYPE>CHECKING</ACCTTYPE>
+        </BANKACCTFROM>
+        <LEDGERBAL>
+          <BALAMT>280.48</BALAMT>
+          <DTASOF>20260126131305[+11.00:AEDT]</DTASOF>
+        </LEDGERBAL>
+        <BANKTRANLIST>
+          <DTSTART>20260101000000[+11.00:AEDT]</DTSTART>
+          <DTEND>20260131235959[+11.00:AEDT]</DTEND>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260121185836[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-42.00</TRNAMT>
+            <FITID>2809671063</FITID>
+            <NAME>Next Level Sth M</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260121185836[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-1.00</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2809671162</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260117000228[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-80.18</TRNAMT>
+            <FITID>2800213343</FITID>
+            <NAME>Pineapple Net</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260117000228[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.82</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2800213365</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260116170334[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-20.00</TRNAMT>
+            <FITID>2808470469</FITID>
+            <NAME>Transport Victoria</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260116170334[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-1.00</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2799598460</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260115162938[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-15.61</TRNAMT>
+            <FITID>2797224562</FITID>
+            <NAME>PayPal</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260115162938[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.39</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2797224654</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260113103558[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-20.00</TRNAMT>
+            <FITID>2796086780</FITID>
+            <NAME>Transport Victoria</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260113103558[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-1.00</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2791955675</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260112163158[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-13.88</TRNAMT>
+            <FITID>2790617864</FITID>
+            <NAME>PayPal</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260112163158[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.12</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2790617923</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260112123029[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-33.57</TRNAMT>
+            <FITID>2790234893</FITID>
+            <NAME>PayPal</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260112123029[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.43</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2790234977</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260109202318[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-14.62</TRNAMT>
+            <FITID>2785542971</FITID>
+            <NAME>PayPal</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260109202318[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.38</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2785543068</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260109121321[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-99.98</TRNAMT>
+            <FITID>2784710788</FITID>
+            <NAME>Medibank</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260109121321[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.02</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2784710861</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260108175112[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-22.10</TRNAMT>
+            <FITID>2784200746</FITID>
+            <NAME>Guzman y Gomez</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260108175112[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.90</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2783076477</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260107185534[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-42.00</TRNAMT>
+            <FITID>2780936362</FITID>
+            <NAME>Next Level Sth M</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260107185534[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-1.00</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2780936427</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260106214332[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-13.13</TRNAMT>
+            <FITID>2779011096</FITID>
+            <NAME>Raghav 🇦🇺</NAME>
+            <MEMO>Trip</MEMO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260106214300[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-1390.00</TRNAMT>
+            <FITID>2779010522</FITID>
+            <NAME>Raghav 🇦🇺</NAME>
+            <MEMO>Rent Bond</MEMO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT</TRNTYPE>
+            <DTPOSTED>20260106203655[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>1390.00</TRNAMT>
+            <FITID>2778924447</FITID>
+            <NAME>RTBA</NAME>
+            <MEMO>0006202420</MEMO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260106183719[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-26.87</TRNAMT>
+            <FITID>2778710831</FITID>
+            <NAME>PayPal</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260106183719[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.13</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2778710955</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260106161038[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-20.00</TRNAMT>
+            <FITID>2781957804</FITID>
+            <NAME>Transport Victoria</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260106161038[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-1.00</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2778477720</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT</TRNTYPE>
+            <DTPOSTED>20260103185626[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>16.50</TRNAMT>
+            <FITID>2773340945</FITID>
+            <NAME>$yashraj13</NAME>
+            <MEMO></MEMO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT</TRNTYPE>
+            <DTPOSTED>20260103185619[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>12.00</TRNAMT>
+            <FITID>2773340788</FITID>
+            <NAME>$yashraj13</NAME>
+            <MEMO>Gold?</MEMO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT</TRNTYPE>
+            <DTPOSTED>20260103185413[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>18.60</TRNAMT>
+            <FITID>2773338064</FITID>
+            <NAME>$yashraj13</NAME>
+            <MEMO></MEMO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT</TRNTYPE>
+            <DTPOSTED>20260103185407[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>6.10</TRNAMT>
+            <FITID>2773337952</FITID>
+            <NAME>$yashraj13</NAME>
+            <MEMO></MEMO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260103140043[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-49.70</TRNAMT>
+            <FITID>2774136659</FITID>
+            <NAME>Sahib E Swad</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260103140043[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.30</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2772910528</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT</TRNTYPE>
+            <DTPOSTED>20260102162605[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>0.97</TRNAMT>
+            <FITID>2771168288</FITID>
+            <NAME>PAYPAL AUSTRALIA</NAME>
+            <MEMO>1047328735622</MEMO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260102162605[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-81.60</TRNAMT>
+            <FITID>2771168281</FITID>
+            <NAME>PayPal</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260102162605[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-0.40</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2771168376</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260102151806[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-20.00</TRNAMT>
+            <FITID>2779767484</FITID>
+            <NAME>Transport Victoria</NAME>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260102151806[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-1.00</TRNAMT>
+            <NAME>Round Up</NAME>
+            <FITID>2771052669</FITID>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20260101090333[+11.00:AEDT]</DTPOSTED>
+            <TRNAMT>-100.00</TRNAMT>
+            <FITID>2768317925</FITID>
+            <NAME>American Express Australia</NAME>
+            <MEMO>From Chirag</MEMO>
+          </STMTTRN>
+        </BANKTRANLIST>
+      </STMTRS>
+    </STMTTRNRS>
+  </BANKMSGSRSV1>
+</OFX>

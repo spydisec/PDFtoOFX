@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anz-plus-to-ofx"
+version = "0.1.0"
+description = "Convert ANZ Plus bank statement PDFs to OFX format for Actual Budget"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "PDFtoOFX Contributors"}
+]
+keywords = ["anz", "anz-plus", "ofx", "pdf", "banking", "converter", "actual-budget", "australia"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Office/Business :: Financial",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+dependencies = [
+    "ofxtools>=0.9.6",
+    "pdfplumber>=0.11.0",
+    "pydantic>=2.5.3",
+    "python-dateutil>=2.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+]
+
+[project.scripts]
+pdftoofx = "app.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --cov=app --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

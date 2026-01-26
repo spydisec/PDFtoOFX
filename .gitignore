@@ -1,10 +1,15 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[codz]
+*.py[cod]
 *$py.class
 
 # C extensions
 *.so
+*.pdf
+# Test outputs and temporary OFX files
+test_output*.ofx
+*.ofx
+!examples/outputs/*.ofx
 
 # Distribution / packaging
 .Python
