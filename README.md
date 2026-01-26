@@ -23,12 +23,20 @@ Convert ANZ Plus bank statement PDFs to OFX format for seamless import into Actu
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/PDFtoOFX.git
+git clone https://github.com/spydisec/PDFtoOFX.git
 cd PDFtoOFX
+
+# Create and activate virtual environment (recommended)
+python3 -m venv .venv
+source .venv/bin/activate  # On Linux/Mac
+# or
+.venv\Scripts\Activate.ps1  # On Windows
 
 # Install dependencies
 pip install -r requirements.txt
 ```
+
+**📚 For detailed installation instructions including Linux self-hosting, systemd service setup, Docker deployment, and Nginx configuration, see [INSTALLATION.md](INSTALLATION.md)**
 
 ### Option 1: Web Interface (Recommended)
 
@@ -345,8 +353,10 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/yourusername/PDFtoOFX/issues)
-- **Documentation:** [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Issues:** [GitHub Issues](https://github.com/spydisec/PDFtoOFX/issues)
+- **Installation Guide:** [INSTALLATION.md](INSTALLATION.md) - Detailed setup for Linux, Docker, systemd, etc.
+- **Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md) - Technical documentation
+- **Repository:** [github.com/spydisec/PDFtoOFX](https://github.com/spydisec/PDFtoOFX)
 - **Examples:** Check the [examples/](examples/) directory
 
 ---
