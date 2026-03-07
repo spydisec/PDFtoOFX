@@ -259,9 +259,10 @@ class AnzPlusParser:
         Determine if transaction is CREDIT or DEBIT.
         
         Priority:
-        1. Balance change calculation (most reliable)
-        2. Keyword detection in description
-        3. Default to DEBIT
+        1. Directional keywords (FROM/TO) — unambiguous, always correct
+        2. Balance change calculation — reliable for non-transfer transactions
+        3. General keyword detection
+        4. Default to DEBIT
         
         Args:
             description: Transaction description
@@ -272,29 +273,36 @@ class AnzPlusParser:
         Returns:
             TransactionType.CREDIT or TransactionType.DEBIT
         """
-        # Method 1: Calculate from balance changes (most reliable)
+        desc_upper = description.upper()
+        
+        # Method 1: Directional FROM/TO keywords (highest priority)
+        # These keywords unambiguously indicate direction regardless of balance
+        # changes. The balance-based method can misfire for inter-account
+        # transfers when multiple transactions fall between two balance points.
+        from_keywords = ['PAYMENT FROM', 'TRANSFER FROM', 'ROUND UP FROM']
+        to_keywords = ['PAYMENT TO', 'TRANSFER TO', 'ROUND UP TO']
+        
+        for keyword in from_keywords:
+            if keyword in desc_upper:
+                return TransactionType.CREDIT
+        
+        for keyword in to_keywords:
+            if keyword in desc_upper:
+                return TransactionType.DEBIT
+        
+        # Method 2: Calculate from balance changes
         # PDF shows newest→oldest, so balance_after is from a chronologically LATER date
-        # Example: Current txn on Jan 20 has balance $258.45
-        #          Later txn on Jan 22 has balance $233.45
-        #          Change: $233.45 - $258.45 = -$25.00 (decreased = spent money = DEBIT)
         if current_balance is not None and balance_after is not None:
             balance_change = balance_after - current_balance
-            # If balance decreased over time (negative change), money went out = DEBIT
-            # If balance increased over time (positive change), money came in = CREDIT
             if balance_change < 0:
                 return TransactionType.DEBIT
             elif balance_change > 0:
                 return TransactionType.CREDIT
             # If balance_change == 0, fall through to keyword detection
         
-        # Method 2: Keyword detection
-        desc_upper = description.upper()
-        
-        # Credit keywords (money coming in)
+        # Method 3: General keyword detection
         credit_keywords = [
-            'PAYMENT FROM',
             'DEPOSIT',
-            'TRANSFER FROM',
             'REFUND',
             'SALARY',
             'INTEREST CREDIT',
@@ -302,10 +310,7 @@ class AnzPlusParser:
             'REVERSAL',
         ]
         
-        # Debit keywords (money going out)
         debit_keywords = [
-            'PAYMENT TO',
-            'TRANSFER TO',
             'VISA DEBIT',
             'EFTPOS',
             'WITHDRAWAL',
@@ -315,12 +320,10 @@ class AnzPlusParser:
             'CHARGE',
         ]
         
-        # Check credit keywords first
         for keyword in credit_keywords:
             if keyword in desc_upper:
                 return TransactionType.CREDIT
         
-        # Check debit keywords
         for keyword in debit_keywords:
             if keyword in desc_upper:
                 return TransactionType.DEBIT
