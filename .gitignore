@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 *.pdf
+ofxfix/
+.github/ofxfix
 # Test outputs and temporary OFX files
 test_output*.ofx
 *.ofx
@@ -221,3 +223,5 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 .github/copilot-instructions.md
+ofxfix/PROMPT.md
+.gitignore
