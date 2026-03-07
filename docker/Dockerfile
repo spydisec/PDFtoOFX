@@ -47,7 +47,7 @@ RUN apk upgrade --no-cache
 # Add labels for metadata and security
 LABEL maintainer="spydisec" \
       description="ANZ Plus to OFX Converter - Convert ANZ Plus bank statements to OFX format" \
-      version="1.1.0" \
+      version="1.2.1" \
       org.opencontainers.image.source="https://github.com/spydisec/PDFtoOFX" \
       org.opencontainers.image.documentation="https://github.com/spydisec/PDFtoOFX/blob/main/README.md" \
       org.opencontainers.image.licenses="MIT"
