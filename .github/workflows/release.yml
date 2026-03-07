@@ -128,6 +128,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Trigger Docker Build
-        run: |
-          echo "Git tag v${{ steps.new-version.outputs.version }} pushed."
-          echo "Docker build workflow will be triggered automatically by the tag push."
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docker-publish.yml',
+              ref: 'main',
+              inputs: {
+                version: '${{ steps.new-version.outputs.version }}'
+              }
+            })
+            core.info('Triggered Docker build workflow for version ${{ steps.new-version.outputs.version }}')
