@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-03-07
+
+### Fixed
+- Corrected sign inversion for inter-account transfers (FROM/TO keywords) in OFX output (#13)
+
+### Security
+- Bumped werkzeug 3.1.5 → 3.1.6 — fixes Windows device name path traversal (GHSA-29vq-49wr-vm6x) (#17)
+- Bumped pillow 12.1.0 → 12.1.1, cryptography 46.0.3 → 46.0.5, protobuf 6.33.4 → 6.33.5 (#14)
+
+### Changed
+- CI: Fixed conventional commits check (comma-separated format) (#18)
+- CI: Added workflow permissions for PR comments (#16)
+- CI: Replaced unmaintained `toml` package with stdlib `tomllib` in release workflow (#16)
+- CI: Docker build now triggered via `workflow_dispatch` instead of relying on tag push (#19)
+
 ## [1.1.0] - 2026-03-07
 
 ### Fixed
