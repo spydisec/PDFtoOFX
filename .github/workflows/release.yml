@@ -36,14 +36,10 @@ jobs:
         with:
           python-version: '3.14'
       
-      - name: Install dependencies
-        run: |
-          pip install toml
-      
       - name: Get current version
         id: current-version
         run: |
-          VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Current version: $VERSION"
       
@@ -77,22 +73,8 @@ jobs:
       
       - name: Update pyproject.toml
         run: |
-          python << 'EOF'
-          import toml
-          
-          # Read pyproject.toml
-          with open('pyproject.toml', 'r') as f:
-              config = toml.load(f)
-          
-          # Update version
-          config['project']['version'] = '${{ steps.new-version.outputs.version }}'
-          
-          # Write back
-          with open('pyproject.toml', 'w') as f:
-              toml.dump(config, f)
-          
-          print(f"Updated pyproject.toml to version ${{ steps.new-version.outputs.version }}")
-          EOF
+          sed -i 's/^version = ".*"/version = "${{ steps.new-version.outputs.version }}"/' pyproject.toml
+          echo "Updated pyproject.toml to version ${{ steps.new-version.outputs.version }}"
       
       - name: Update CHANGELOG.md
         run: |
