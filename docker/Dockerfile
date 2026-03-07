@@ -89,9 +89,10 @@ ENV ENVIRONMENT=production \
 EXPOSE 8000
 
 # Health check
-# Check every 30 seconds, timeout 10 seconds, 3 retries before unhealthy
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=5s \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
+# Check every 10 seconds, timeout 5 seconds, 3 retries before unhealthy
+# start-period gives workers time to start before failures count
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=10s \
+    CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT}/health || exit 1
 
 # Run the application
 CMD ["python", "run_web.py"]
