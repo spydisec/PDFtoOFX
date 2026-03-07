@@ -1,2 +1,3 @@
-"""ANZ Plus PDF to OFX Converter"""
-__version__ = "0.1.0"
+"""ANZ Plus PDF to OFX Converter."""
+
+__version__ = "1.1.1"

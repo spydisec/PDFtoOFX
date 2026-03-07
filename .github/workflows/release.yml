@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
+      actions: write
     
     steps:
       - name: Checkout code
@@ -75,7 +75,17 @@ jobs:
         run: |
           sed -i 's/^version = ".*"/version = "${{ steps.new-version.outputs.version }}"/' pyproject.toml
           echo "Updated pyproject.toml to version ${{ steps.new-version.outputs.version }}"
-      
+
+      - name: Update app/__init__.py
+        run: |
+          sed -i 's/__version__ = ".*"/__version__ = "${{ steps.new-version.outputs.version }}"/' app/__init__.py
+          echo "Updated app/__init__.py to version ${{ steps.new-version.outputs.version }}"
+
+      - name: Update Dockerfile LABEL version
+        run: |
+          sed -i 's/version="[^"]*"/version="${{ steps.new-version.outputs.version }}"/' docker/Dockerfile
+          echo "Updated Dockerfile LABEL to version ${{ steps.new-version.outputs.version }}"
+
       - name: Update CHANGELOG.md
         run: |
           DATE=$(date +%Y-%m-%d)
@@ -92,7 +102,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pyproject.toml CHANGELOG.md
+          git add pyproject.toml app/__init__.py docker/Dockerfile CHANGELOG.md
           git commit -m "chore: Release v${{ steps.new-version.outputs.version }}"
           git push origin main
       
