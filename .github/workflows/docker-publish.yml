@@ -121,9 +121,6 @@ jobs:
           repository: ${{ env.DOCKER_HUB_REPO }}
           short-description: 'Convert ANZ Plus bank statement PDFs to OFX format for Actual Budget'
           readme-filepath: ./README.md
-          repository: ${{ env.DOCKER_HUB_REPO }}
-          short-description: 'Convert ANZ Plus bank statement PDFs to OFX format for Actual Budget'
-          readme-filepath: ./README.md
       
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
