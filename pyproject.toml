@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anz-plus-to-ofx"
-version = "1.2.2"
+version = "1.2.3"
 description = "Convert ANZ Plus bank statement PDFs to OFX format for Actual Budget"
 readme = "README.md"
 requires-python = ">=3.11"
