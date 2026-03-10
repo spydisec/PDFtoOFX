@@ -228,3 +228,4 @@ ofxfix/OFX-SIGN-BUG-REPORT.md
 ofxfix/reconvert_and_diff.py
 ofxfix/validate_test_cases.py
 .gitignore
+tests/LeRoy_BankToOFX_Converter.py
