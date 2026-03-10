@@ -9,7 +9,6 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from starlette.background import BackgroundTask
 
-from app.services.pdf_extractor import extract_text_from_pdf
 from app.services.anz_plus_parser import AnzPlusParser
 from app.services.ofx_generator import OFXGenerator
 from app.models import BankConfig
@@ -80,20 +79,10 @@ async def convert_pdf(file: UploadFile = File(...)):
         
         logger.debug(f"PDF saved to temporary file: {pdf_path}")
         
-        # Extract text from PDF
-        logger.info("Extracting text from PDF...")
-        text = extract_text_from_pdf(pdf_path)
-        
-        if not text or len(text.strip()) < 100:
-            logger.error(f"Failed to extract text from PDF: text_length={len(text) if text else 0}")
-            return error_response("Could not extract text from PDF. Please ensure it's a valid ANZ Plus statement.")
-        
-        logger.debug(f"Text extracted successfully: {len(text)} characters")
-        
-        # Parse transactions
-        logger.info("Parsing transactions...")
+        # Parse PDF with column-aware extraction
+        logger.info("Parsing PDF...")
         parser = AnzPlusParser()
-        statement = parser.parse(text)
+        statement = parser.parse_pdf(pdf_path)
         
         if not statement.transactions:
             logger.warning("No transactions found in PDF")

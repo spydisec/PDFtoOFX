@@ -2,10 +2,11 @@
 import re
 from datetime import datetime, date
 from decimal import Decimal
+from pathlib import Path
 from typing import List, Optional
-from dateutil import parser as date_parser
 
 from app.models import Transaction, Statement, TransactionType, AccountType
+from app.services.pdf_extractor import extract_transactions_from_pdf, extract_header_info
 from app.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -23,14 +24,12 @@ def smart_truncate(description: str, max_len: int = 32) -> str:
     Returns:
         Truncated description with merchant name preserved
     """
-    # Common prefixes to remove
+    # Common prefixes to remove (card-related only)
+    # Transfer/payment prefixes are kept — they ARE the payee identity
     prefixes = [
         'VISA DEBIT PURCHASE CARD 1633 ',
         'VISA DEBIT PURCHASE CARD ',
         'EFTPOS ',
-        'PAYMENT TO ',
-        'TRANSFER TO ',
-        'TRANSFER FROM ',
     ]
     
     clean = description
@@ -49,19 +48,8 @@ def smart_truncate(description: str, max_len: int = 32) -> str:
 class AnzPlusParser:
     """Parser for ANZ Plus PDF transaction lists"""
     
-    # Account info patterns
-    BSB_PATTERN = r'Branch Number \(BSB\)\s+Account Number\s+Balance as at.*?\n(\d+)\s+\$'
-    ACCOUNT_PATTERN = r'Branch Number \(BSB\)\s+Account Number'
-    # Updated pattern to handle balance on next line
-    BALANCE_PATTERN = r'Balance as at (\d+) ([A-Za-z]+) (\d{4})\s*\n[\d\s]+\$?([\d,]+\.\d{2})'
-    
-    # Transaction line pattern
-    # Format: "23 Jan ROUND UP TO 014111-169318495 #550672 $0.44 $232.16"
-    # or: "22 Jan VISA DEBIT PURCHASE CARD 1633 MYKI $25.00 $233.45"
+    # Transaction line pattern (for text-based fallback)
     TRANSACTION_PATTERN = r'^(\d{1,2})\s+([A-Z][a-z]{2})\s+(.+?)\s+\$?([\d,]+\.\d{2})(?:\s+\$?([\d,]+\.\d{2}))?$'
-    
-    # Effective date pattern (appears on next line sometimes)
-    EFFECTIVE_DATE_PATTERN = r'Effective Date (\d{2})/(\d{2})/(\d{4})'
     
     def __init__(self, year: int = None):
         """
@@ -72,9 +60,86 @@ class AnzPlusParser:
         """
         self.year = year or datetime.now().year
     
-    def parse(self, text: str) -> Statement:
+    def parse_pdf(self, pdf_path: Path) -> Statement:
+        """Parse an ANZ Plus PDF file using column-aware extraction.
+
+        Uses word positions to correctly distinguish Credit vs Debit columns.
+
+        Args:
+            pdf_path: Path to the PDF file.
+
+        Returns:
+            Statement object with transactions.
         """
-        Parse ANZ Plus PDF text into Statement object.
+        logger.info(f"Parsing PDF with column-aware extraction: {pdf_path}")
+
+        # Extract header info (BSB, account, balances, year)
+        info = extract_header_info(pdf_path)
+        if info["year"]:
+            self.year = info["year"]
+
+        opening_balance = Decimal(info["opening_balance"]) if info["opening_balance"] else None
+        closing_balance = Decimal(info["closing_balance"]) if info["closing_balance"] else None
+
+        # Extract structured transaction rows
+        raw_rows = extract_transactions_from_pdf(pdf_path)
+        transactions: List[Transaction] = []
+
+        for row in raw_rows:
+            # Parse date
+            try:
+                txn_date = datetime.strptime(
+                    f"{row['date_str']} {self.year}", "%d %b %Y"
+                ).date()
+            except ValueError:
+                continue
+
+            description = row["description"]
+            balance = Decimal(row["balance"]) if row["balance"] else None
+
+            # Credit/Debit is determined by which PDF column the amount was in
+            if row["credit"]:
+                amount = Decimal(row["credit"])
+                txn_type = TransactionType.CREDIT
+            elif row["debit"]:
+                amount = Decimal(row["debit"])
+                txn_type = TransactionType.DEBIT
+            else:
+                continue
+
+            transactions.append(Transaction(
+                date=txn_date,
+                description=description,
+                amount=amount,
+                transaction_type=txn_type,
+                balance=balance,
+                name=smart_truncate(description, 32),
+                memo=description,
+            ))
+
+        logger.info(f"Found {len(transactions)} transactions")
+
+        # Date range
+        if transactions:
+            dates = [t.date for t in transactions]
+            date_start, date_end = min(dates), max(dates)
+        else:
+            date_start = date_end = date.today()
+
+        return Statement(
+            account_name="ANZ Plus",
+            account_number=info["account_number"],
+            bsb=info["bsb"],
+            account_type=AccountType.CHECKING,
+            opening_balance=opening_balance,
+            closing_balance=closing_balance,
+            date_start=date_start,
+            date_end=date_end,
+            transactions=transactions,
+        )
+
+    def parse(self, text: str) -> Statement:
+        """Parse ANZ Plus PDF text into Statement object (text-based fallback).
         
         Args:
             text: Extracted PDF text
@@ -82,65 +147,39 @@ class AnzPlusParser:
         Returns:
             Statement object with transactions
         """
-        logger.info("Starting ANZ Plus PDF parsing")
-        logger.debug(f"Input text length: {len(text)} characters")
+        logger.info("Starting ANZ Plus PDF parsing (text mode)")
         
-        # Extract year from balance date if available
-        balance_match = re.search(self.BALANCE_PATTERN, text)
-        if balance_match:
-            _, _, year_str, balance_str = balance_match.groups()
-            self.year = int(year_str)
-            closing_balance = Decimal(balance_str.replace(',', ''))
-            logger.info(f"Closing balance found: ${closing_balance} for year {self.year}")
-        else:
-            closing_balance = None
-            logger.warning("No closing balance found in PDF")
-        
-        # Extract BSB and account number
-        # Pattern: "014111 169 318 495 $86.56" after "Balance as at"
-        bsb_account_pattern = r'Balance as at.*?\n(\d{6})\s+([\d\s]+)\s+\$'
-        bsb_account_match = re.search(bsb_account_pattern, text)
-        if bsb_account_match:
-            bsb = bsb_account_match.group(1)
-            account_number = bsb_account_match.group(2).replace(' ', '')  # Remove spaces
-            logger.info(f"Account identified: BSB={bsb}, Account={account_number}")
+        # Extract year from header
+        year_match = re.search(r'(\d{1,2})\s+(\w+)\s+(20\d{2})', text)
+        if year_match:
+            self.year = int(year_match.group(3))
+
+        # Extract opening/closing balances
+        bal_match = re.search(
+            r'(\d{3}\s*\d{3})\s+([\d\s]+?)\s+\$([\d,]+\.\d{2})\s+\$([\d,]+\.\d{2})',
+            text,
+        )
+        if bal_match:
+            bsb_raw, acct_raw, open_str, close_str = bal_match.groups()
+            bsb = bsb_raw.replace(" ", "")[:3] + "-" + bsb_raw.replace(" ", "")[3:]
+            account_number = acct_raw.replace(" ", "")
+            opening_balance = Decimal(open_str.replace(",", ""))
+            closing_balance = Decimal(close_str.replace(",", ""))
         else:
             bsb = None
-            account_number = "ANZPLUS"  # Placeholder
-            logger.warning("BSB and account number not found, using placeholder")
+            account_number = "ANZPLUS"
+            opening_balance = None
+            closing_balance = None
         
         # Parse transactions
-        logger.info("Parsing transactions...")
-        transactions = self._parse_transactions(text)
+        transactions = self._parse_transactions_from_text(text)
         logger.info(f"Found {len(transactions)} transactions")
         
-        # Determine date range from transactions
         if transactions:
             dates = [t.date for t in transactions]
-            date_start = min(dates)
-            date_end = max(dates)
-            logger.info(f"Date range: {date_start} to {date_end}")
+            date_start, date_end = min(dates), max(dates)
         else:
             date_start = date_end = date.today()
-            logger.warning("No transactions found, using current date")
-        
-        # Opening balance is the balance of the earliest transaction
-        opening_balance = None
-        if transactions:
-            # Sort by date
-            sorted_txns = sorted(transactions, key=lambda t: t.date)
-            # Find first transaction with a balance
-            for txn in sorted_txns:
-                if txn.balance is not None:
-                    # Calculate opening balance
-                    if txn.transaction_type == TransactionType.DEBIT:
-                        opening_balance = txn.balance + txn.amount
-                    else:
-                        opening_balance = txn.balance - txn.amount
-                    logger.info(f"Opening balance calculated: ${opening_balance}")
-                    break
-        
-        logger.info("ANZ Plus PDF parsing completed successfully")
         
         return Statement(
             account_name="ANZ Plus",
@@ -151,88 +190,63 @@ class AnzPlusParser:
             closing_balance=closing_balance,
             date_start=date_start,
             date_end=date_end,
-            transactions=transactions
+            transactions=transactions,
         )
     
-    def _parse_transactions(self, text: str) -> List[Transaction]:
-        """Parse all transactions from statement text with multi-line support"""
+    def _parse_transactions_from_text(self, text: str) -> List[Transaction]:
+        """Parse transactions from plain text (fallback when PDF path unavailable)."""
         transactions = []
         lines = text.split('\n')
-        next_balance = None  # Track next transaction's balance (statements go newest->oldest)
+        next_balance = None
         
         i = 0
         while i < len(lines):
             line = lines[i].strip()
             
-            # Try to match transaction line
             match = re.match(self.TRANSACTION_PATTERN, line)
             if match:
                 day_str, month_abbr, description, amount_str, balance_str = match.groups()
                 
-                # Parse date
                 try:
                     txn_date = datetime.strptime(f"{day_str} {month_abbr} {self.year}", "%d %b %Y").date()
                 except ValueError:
                     i += 1
                     continue
                 
-                # Clean up description
                 description = description.strip()
                 
                 # Capture multi-line descriptions
-                # Look ahead for continuation lines (merchant details, location, reference)
                 j = i + 1
                 continuation_parts = []
                 while j < len(lines):
                     next_line = lines[j].strip()
-                    
-                    # Stop at "Effective Date" line
                     if next_line.startswith('Effective Date'):
                         break
-                    
-                    # Stop if we hit another transaction
                     if re.match(self.TRANSACTION_PATTERN, next_line):
                         break
-                    
-                    # Stop if empty line or page footer
                     if not next_line or 'Page' in next_line or 'Australia and New Zealand' in next_line:
                         break
-                    
-                    # Stop if we hit table headers
                     if next_line.startswith('Date') and 'Description' in next_line:
                         break
-                    
-                    # This is a continuation line
                     continuation_parts.append(next_line)
                     j += 1
                 
-                # Concatenate multi-line description
                 if continuation_parts:
-                    # Join with space, clean up extra whitespace
                     full_description = ' '.join([description] + continuation_parts)
-                    full_description = ' '.join(full_description.split())  # Normalize whitespace
+                    full_description = ' '.join(full_description.split())
                 else:
                     full_description = description
                 
-                # Parse amounts
                 amount = Decimal(amount_str.replace(',', ''))
                 balance = Decimal(balance_str.replace(',', '')) if balance_str else None
                 
-                # Determine transaction type with improved logic
-                # PDF lists newest→oldest, so we track balance_after_this_txn (chronologically)
                 transaction_type = self._determine_transaction_type(
-                    full_description, 
-                    balance,  # Balance at this transaction date
-                    next_balance,  # Balance at later date (chronologically) - from previous PDF line
-                    amount
+                    full_description, balance, next_balance, amount
                 )
                 
-                # Store current balance for next iteration
-                # (next PDF line is chronologically earlier)
                 if balance is not None:
                     next_balance = balance
                 
-                # Create transaction with smart truncation
                 transaction = Transaction(
                     date=txn_date,
                     description=full_description,
@@ -240,7 +254,7 @@ class AnzPlusParser:
                     transaction_type=transaction_type,
                     balance=balance,
                     name=smart_truncate(full_description, 32),
-                    memo=full_description
+                    memo=full_description,
                 )
                 transactions.append(transaction)
             
@@ -253,81 +267,43 @@ class AnzPlusParser:
         description: str, 
         current_balance: Optional[Decimal],
         balance_after: Optional[Decimal],
-        amount: Decimal
+        amount: Decimal,
     ) -> TransactionType:
-        """
-        Determine if transaction is CREDIT or DEBIT.
-        
-        Priority:
-        1. Directional keywords (FROM/TO) — unambiguous, always correct
-        2. Balance change calculation — reliable for non-transfer transactions
-        3. General keyword detection
-        4. Default to DEBIT
+        """Determine if transaction is CREDIT or DEBIT (text-based fallback).
         
         Args:
             description: Transaction description
             current_balance: Balance at this transaction's date
-            balance_after: Balance at a later date (chronologically AFTER this transaction)
+            balance_after: Balance at a later date (from previous PDF line)
             amount: Transaction amount
             
         Returns:
             TransactionType.CREDIT or TransactionType.DEBIT
         """
+        # Balance change is ground truth
+        if current_balance is not None and balance_after is not None:
+            delta = balance_after - current_balance
+            if delta < 0:
+                return TransactionType.DEBIT
+            elif delta > 0:
+                return TransactionType.CREDIT
+        
+        # Keyword fallback
         desc_upper = description.upper()
         
-        # Method 1: Directional FROM/TO keywords (highest priority)
-        # These keywords unambiguously indicate direction regardless of balance
-        # changes. The balance-based method can misfire for inter-account
-        # transfers when multiple transactions fall between two balance points.
-        from_keywords = ['PAYMENT FROM', 'TRANSFER FROM', 'ROUND UP FROM']
-        to_keywords = ['PAYMENT TO', 'TRANSFER TO', 'ROUND UP TO']
-        
-        for keyword in from_keywords:
-            if keyword in desc_upper:
+        for kw in ['PAYMENT FROM', 'TRANSFER FROM', 'ROUND UP FROM']:
+            if kw in desc_upper:
                 return TransactionType.CREDIT
-        
-        for keyword in to_keywords:
-            if keyword in desc_upper:
+        for kw in ['PAYMENT TO', 'TRANSFER TO', 'ROUND UP TO']:
+            if kw in desc_upper:
                 return TransactionType.DEBIT
         
-        # Method 2: Calculate from balance changes
-        # PDF shows newest→oldest, so balance_after is from a chronologically LATER date
-        if current_balance is not None and balance_after is not None:
-            balance_change = balance_after - current_balance
-            if balance_change < 0:
-                return TransactionType.DEBIT
-            elif balance_change > 0:
+        for kw in ['DEPOSIT', 'REFUND', 'SALARY', 'INTEREST CREDIT', 'INTEREST PAID', 'REVERSAL']:
+            if kw in desc_upper:
                 return TransactionType.CREDIT
-            # If balance_change == 0, fall through to keyword detection
-        
-        # Method 3: General keyword detection
-        credit_keywords = [
-            'DEPOSIT',
-            'REFUND',
-            'SALARY',
-            'INTEREST CREDIT',
-            'INTEREST PAID',
-            'REVERSAL',
-        ]
-        
-        debit_keywords = [
-            'VISA DEBIT',
-            'EFTPOS',
-            'WITHDRAWAL',
-            'ATM',
-            'DIRECT DEBIT',
-            'FEE',
-            'CHARGE',
-        ]
-        
-        for keyword in credit_keywords:
-            if keyword in desc_upper:
-                return TransactionType.CREDIT
-        
-        for keyword in debit_keywords:
-            if keyword in desc_upper:
+        for kw in ['VISA DEBIT', 'EFTPOS', 'WITHDRAWAL', 'ATM', 'DIRECT DEBIT', 'FEE', 'CHARGE']:
+            if kw in desc_upper:
                 return TransactionType.DEBIT
         
-        # Default to DEBIT (conservative approach)
         return TransactionType.DEBIT
 

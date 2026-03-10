@@ -8,7 +8,6 @@ Specifically designed for ANZ Plus digital statement format.
 import sys
 from pathlib import Path
 
-from app.services.pdf_extractor import extract_text_from_pdf
 from app.services.anz_plus_parser import AnzPlusParser
 from app.services.ofx_generator import OFXGenerator
 from app.models import BankConfig
@@ -43,15 +42,10 @@ def main():
     print()
     
     try:
-        # Step 1: Extract text from PDF
-        print("Step 1: Extracting text from PDF...")
-        text = extract_text_from_pdf(input_path)
-        print(f"  ✓ Extracted {len(text)} characters")
-        
-        # Step 2: Parse transactions
-        print("Step 2: Parsing transactions...")
+        # Step 1: Parse PDF
+        print("Step 1: Parsing PDF...")
         parser = AnzPlusParser()
-        statement = parser.parse(text)
+        statement = parser.parse_pdf(input_path)
         print(f"  ✓ Found {len(statement.transactions)} transactions")
         print(f"  ✓ Date range: {statement.date_start} to {statement.date_end}")
         if statement.opening_balance:
@@ -59,8 +53,8 @@ def main():
         if statement.closing_balance:
             print(f"  ✓ Closing balance: ${statement.closing_balance}")
         
-        # Step 3: Generate OFX
-        print("Step 3: Generating OFX file...")
+        # Step 2: Generate OFX
+        print("Step 2: Generating OFX file...")
         bank_config = BankConfig(
             name="ANZ Plus",
             ofx_version=220,  # OFX v2.20 XML format
@@ -71,8 +65,8 @@ def main():
         ofx_content = generator.generate(statement)
         print(f"  ✓ Generated {len(ofx_content)} bytes of OFX data")
         
-        # Step 4: Write to file
-        print("Step 4: Writing OFX file...")
+        # Step 3: Write to file
+        print("Step 3: Writing OFX file...")
         output_path.write_bytes(ofx_content)
         print(f"  ✓ Saved to {output_path}")
         
