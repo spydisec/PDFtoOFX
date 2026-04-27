@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
       
       - name: Check Conventional Commits
-        uses: webiny/action-conventional-commits@v1.3.1
+        uses: webiny/action-conventional-commits@v1.4.2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           allowed-commit-types: "feat,fix,docs,chore,style,refactor,perf,test,build,ci,revert"
